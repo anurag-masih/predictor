@@ -12,7 +12,11 @@ st.markdown("Tracking leading indicators and policy signals in real-time.")
 st.header("1. Leading Market Indicators")
 
 @st.cache_data(ttl=3600)
-data = yf.download(["HG=F", "GC=F"], period="3mo")['Close']
+def load_market_data():
+    return yf.download(["HG=F", "GC=F"], period="3mo")['Close']
+
+data = load_market_data()
+
 if not data.empty:
     data['Copper_Gold_Ratio'] = data['HG=F'] / data['GC=F']
     
