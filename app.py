@@ -56,12 +56,23 @@ st.markdown("---")
 st.header("3. Policy & Geopolitical RSS Feed (Live)")
 
 rss_url = "https://www.bis.org/doc-search/rss.rss"
-feed = feedparser.parse(rss_url)
 
-if feed.entries:
-    for entry in feed.entries[:5]:
-        with st.expander(f"📌 {entry.title}"):
-            st.write(f"**Published:** {entry.get('published', 'N/A')}")
-            st.write(f"[Read Source Document]({entry.link})")
-else:
-    st.info("Unable to parse RSS feed at the moment.")
+try:
+    import requests
+    # Use custom headers so institutional firewalls don't block the request
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+    response = requests.get(rss_url, headers=headers, timeout=10)
+    
+    if response.status_code == 200:
+        feed = feedparser.parse(response.content)
+        if feed.entries:
+            for entry in feed.entries[:5]:
+                with st.expander(f"📌 {entry.title}"):
+                    st.write(f"**Published:** {entry.get('published', 'N/A')}")
+                    st.write(f"[Read Source Document]({entry.link})")
+        else:
+            st.info("The RSS feed parsed successfully, but no entries were found.")
+    else:
+        st.warning(f"Could not connect to RSS feed (Status code: {response.status_code})")
+except Exception as e:
+    st.info("Unable to parse RSS feed at the moment due to network restriction.")
